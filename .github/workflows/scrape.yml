@@ -1,8 +1,9 @@
+# .github/workflows/scrape.yml
 name: Looker Studio Scrape
 
 on:
   schedule:
-    # 07:00,10,13,16,19 UTC → 08:00–20:00 BST
+    # 07:00,10:00,13:00,16:00,19:00 UTC → 08:00–20:00 BST
     - cron: '0 7,10,13,16,19 * * *'
   workflow_dispatch:
 
@@ -39,13 +40,15 @@ jobs:
           MAIN_WEBHOOK:    ${{ secrets.MAIN_WEBHOOK }}
           ALERT_WEBHOOK:   ${{ secrets.ALERT_WEBHOOK }}
 
-      - name: Commit & push updated log
+      - name: Commit & push updated state
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add comments_log.csv
-          git diff --quiet --cached || git commit -m "ci: update comments_log.csv"
+          # Stage both the comments log and the auth state
+          git add comments_log.csv auth_state.json
+          # Only commit if there are changes
+          git diff --quiet --cached || git commit -m "ci: update comments_log.csv and auth_state.json"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
