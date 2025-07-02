@@ -27,8 +27,8 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt playwright
-          # Install both browser binaries and OS dependencies
-          sudo playwright install --with-deps
+          # Install browsers + OS deps via the Python module
+          python -m playwright install --with-deps
 
       - name: Run scraper
         run: python scrape.py
@@ -43,7 +43,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Only stage files if they exist
           CHANGED=false
           if [ -f comments_log.csv ]; then
             git add comments_log.csv
@@ -53,7 +52,6 @@ jobs:
             git add auth_state.json
             CHANGED=true
           fi
-          # Commit & push if anything was staged
           if [ "$CHANGED" = true ]; then
             git diff --quiet --cached || git commit -m "ci: update comments_log.csv & auth_state.json"
             git push
