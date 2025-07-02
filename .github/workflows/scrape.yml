@@ -1,65 +1,61 @@
-# .github/workflows/scrape.yml
-name: Looker Studio Scrape
+name: Run Playwright Scraper
 
 # ────────────────────────────────────────────────────────────────────────────────
-# Triggers: every hour + manual
+# TRIGGERS: manual + every hour
 # ────────────────────────────────────────────────────────────────────────────────
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'    # at :00 every hour
+    - cron: '0 * * * *'  # at :00 every hour
 
 # ────────────────────────────────────────────────────────────────────────────────
-# Prevent overlap
+# CANCEL IN‐PROGRESS RUNS IF RE‐TRIGGERED
 # ────────────────────────────────────────────────────────────────────────────────
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION:  '3.11'
-  UK_TARGET_HOURS: '08 11 14 17 20'   # BST times to actually run your scraper
+  PYTHON_VERSION: '3.11'
+  UK_TARGET_HOURS: '08 11 14 17 20'  # BST hours you actually want to scrape
 
 jobs:
   # ──────────────────────────────────────────────────────────────────────────────
-  # 1) Check Time
+  # 1) CHECK‐TIME
   # ──────────────────────────────────────────────────────────────────────────────
   check-time:
     runs-on: ubuntu-latest
     outputs:
-      run_job: ${{ steps.determine.outputs.run_job }}
+      run_job: ${{ steps.set.outputs.run_job }}
     steps:
-      - name: Determine if this run should execute the scraper
-        id: determine
+      - name: Decide whether to run scraper
+        id: set
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual trigger → running scraper"
+            echo "Manual run → proceeding"
             echo "run_job=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # get London hour (24h, zero-padded)
           CURRENT_UK_HOUR=$(TZ="Europe/London" date +'%H')
-          echo "Current UK hour: ${CURRENT_UK_HOUR}"
-          echo "Target hours: $UK_TARGET_HOURS"
-
-          if [[ " $UK_TARGET_HOURS " =~ " ${CURRENT_UK_HOUR} " ]]; then
+          echo "UK hour: ${CURRENT_UK_HOUR}"
+          if [[ " ${{ env.UK_TARGET_HOURS }} " =~ " ${CURRENT_UK_HOUR} " ]]; then
             echo "run_job=true" >> $GITHUB_OUTPUT
           else
             echo "run_job=false" >> $GITHUB_OUTPUT
           fi
 
   # ──────────────────────────────────────────────────────────────────────────────
-  # 2) Scrape
+  # 2) SCRAPE‐AND‐COMMIT
   # ──────────────────────────────────────────────────────────────────────────────
-  scrape:
+  scrape-and-submit:
     needs: check-time
     if: needs.check-time.outputs.run_job == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Check out code
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           persist-credentials: true
@@ -73,23 +69,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Install OS deps for Playwright
+      - name: Install system deps for Playwright browsers
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libnss3 libatk-bridge2.0-0 libatk1.0-0 libgbm1 \
-            libgtk-3-0 libpangocairo-1.0-0 libxcomposite1 \
-            libxrandr2 libxdamage1 libxfixes3 libxss1 \
-            libxtst6 libxcursor1 libdbus-1-3 curl unzip
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libatk1.0-0 \
+            libgbm1 \
+            libgtk-3-0 \
+            libpangocairo-1.0-0 \
+            libxcomposite1 \
+            libxrandr2 \
+            libxdamage1 \
+            libxfixes3 \
+            libxss1 \
+            libxtst6 \
+            libxcursor1 \
+            libdbus-1-3 \
+            curl \
+            unzip
 
       - name: Install Python deps & Playwright browsers
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt playwright
           python -m playwright install --with-deps
 
@@ -108,11 +117,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           CHANGED=false
 
-          # Only stage if they exist
           if [ -f comments_log.csv ]; then
             git add comments_log.csv
             CHANGED=true
           fi
+
           if [ -f auth_state.json ]; then
             git add auth_state.json
             CHANGED=true
