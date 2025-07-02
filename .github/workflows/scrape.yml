@@ -12,25 +12,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
-      - name: Install system deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libatk1.0-0 libgbm-dev
 
       - name: Install Python deps & Playwright
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt playwright
-          playwright install --with-deps
+          # Install both browser binaries and OS dependencies
+          sudo playwright install --with-deps
 
       - name: Run scraper
         run: python scrape.py
@@ -45,10 +43,20 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Stage both the comments log and the auth state
-          git add comments_log.csv auth_state.json
-          # Only commit if there are changes
-          git diff --quiet --cached || git commit -m "ci: update comments_log.csv and auth_state.json"
-          git push
+          # Only stage files if they exist
+          CHANGED=false
+          if [ -f comments_log.csv ]; then
+            git add comments_log.csv
+            CHANGED=true
+          fi
+          if [ -f auth_state.json ]; then
+            git add auth_state.json
+            CHANGED=true
+          fi
+          # Commit & push if anything was staged
+          if [ "$CHANGED" = true ]; then
+            git diff --quiet --cached || git commit -m "ci: update comments_log.csv & auth_state.json"
+            git push
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
