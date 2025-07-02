@@ -1,135 +1,140 @@
 name: Run Playwright Scraper
 
 # ────────────────────────────────────────────────────────────────────────────────
-# TRIGGERS: manual + every hour
+# TRIGGERS
 # ────────────────────────────────────────────────────────────────────────────────
 on:
-  workflow_dispatch:
+  workflow_dispatch:           # manual button
   schedule:
-    - cron: '0 * * * *'  # at :00 every hour
+    - cron: '0 * * * *'        # every hour on the hour
 
-# ────────────────────────────────────────────────────────────────────────────────
-# CANCEL IN‐PROGRESS RUNS IF RE‐TRIGGERED
-# ────────────────────────────────────────────────────────────────────────────────
+# Abort an older run if a new one for the same branch starts.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   PYTHON_VERSION: '3.11'
-  UK_TARGET_HOURS: '08 11 14 17 20'  # BST hours you actually want to scrape
+  UK_TARGET_HOURS: '08 11 14 17 20'
 
 jobs:
-  # ──────────────────────────────────────────────────────────────────────────────
-  # 1) CHECK‐TIME
-  # ──────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
+# 1) CHECK IF IT'S ONE OF THE TARGET UK HOURS
+# ────────────────────────────────────────────────────────────────────────────────
   check-time:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
-      run_job: ${{ steps.set.outputs.run_job }}
+      run_job: ${{ steps.determine.outputs.run_job }}
     steps:
       - name: Decide whether to run scraper
-        id: set
+        id: determine
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual run → proceeding"
+            echo "Manual trigger ⇒ run_job=true"
             echo "run_job=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          CURRENT_UK_HOUR=$(TZ="Europe/London" date +'%H')
-          echo "UK hour: ${CURRENT_UK_HOUR}"
-          if [[ " ${{ env.UK_TARGET_HOURS }} " =~ " ${CURRENT_UK_HOUR} " ]]; then
+          current=$(TZ='Europe/London' date +'%H')
+          echo "Current UK hour: $current | Target hours: $UK_TARGET_HOURS"
+
+          if [[ " $UK_TARGET_HOURS " =~ " $current " ]]; then
             echo "run_job=true" >> $GITHUB_OUTPUT
           else
             echo "run_job=false" >> $GITHUB_OUTPUT
           fi
 
-  # ──────────────────────────────────────────────────────────────────────────────
-  # 2) SCRAPE‐AND‐COMMIT
-  # ──────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
+# 2) SCRAPE + COMMIT  (only if run_job==true)
+# ────────────────────────────────────────────────────────────────────────────────
   scrape-and-submit:
     needs: check-time
     if: needs.check-time.outputs.run_job == 'true'
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0
+    # ── checkout ────────────────────────────────────────────────────────────────
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: true
+        fetch-depth: 0
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+    # ── pip cache ───────────────────────────────────────────────────────────────
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+    # ── playwright browser cache ────────────────────────────────────────────────
+    - name: Restore Playwright browser cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-pw-browsers-v1
 
-      - name: Install system deps for Playwright browsers
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libnss3 \
-            libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libgbm1 \
-            libgtk-3-0 \
-            libpangocairo-1.0-0 \
-            libxcomposite1 \
-            libxrandr2 \
-            libxdamage1 \
-            libxfixes3 \
-            libxss1 \
-            libxtst6 \
-            libxcursor1 \
-            libdbus-1-3 \
-            curl \
-            unzip
+    # ── python setup ────────────────────────────────────────────────────────────
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
 
-      - name: Install Python deps & Playwright browsers
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt playwright
-          python -m playwright install --with-deps
+    # ── minimal OS libs for Chromium ────────────────────────────────────────────
+    - name: Install system libs for headless Chromium
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libnss3 \
+          libatk-bridge2.0-0 libatk1.0-0 \
+          libgbm1 libgtk-3-0 \
+          libxss1 libasound2 libx11-xcb1
 
-      - name: Run scraper
-        run: python scrape.py
-        env:
-          GOOGLE_EMAIL:    ${{ secrets.GOOGLE_EMAIL }}
-          GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
-          MAIN_WEBHOOK:    ${{ secrets.MAIN_WEBHOOK }}
-          ALERT_WEBHOOK:   ${{ secrets.ALERT_WEBHOOK }}
+    # ── Python deps + Chromium only ─────────────────────────────────────────────
+    - name: Install Python deps & Playwright Chromium
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt playwright
+        python -m playwright install chromium
 
-      - name: Commit & push updated state
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          CHANGED=false
+    # ── save browser cache (if new) ─────────────────────────────────────────────
+    - name: Save Playwright browser cache
+      if: always()
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-pw-browsers-v1
 
-          if [ -f comments_log.csv ]; then
-            git add comments_log.csv
-            CHANGED=true
+    # ── run scraper ─────────────────────────────────────────────────────────────
+    - name: Run scraper
+      run: python scrape.py
+      env:
+        GOOGLE_EMAIL:    ${{ secrets.GOOGLE_EMAIL }}
+        GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
+        MAIN_WEBHOOK:    ${{ secrets.MAIN_WEBHOOK }}
+        ALERT_WEBHOOK:   ${{ secrets.ALERT_WEBHOOK }}
+
+    # ── commit updated CSV + auth state + logs/screens ──────────────────────────
+    - name: Commit & push updated artefacts
+      if: always()
+      run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        changed=false
+        for f in comments_log.csv auth_state.json logs screens; do
+          if [ -e "$f" ]; then
+            git add -f "$f"
+            changed=true
           fi
+        done
 
-          if [ -f auth_state.json ]; then
-            git add auth_state.json
-            CHANGED=true
-          fi
-
-          if [ "$CHANGED" = true ]; then
-            git diff --quiet --cached || git commit -m "ci: update comments_log.csv & auth_state.json"
-            git push
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if [ "$changed" = true ]; then
+          git diff --quiet --cached || git commit -m "ci: update logs, auth_state & comments_log"
+          git push
+        else
+          echo "Nothing new to commit."
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
