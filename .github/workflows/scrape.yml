@@ -1,0 +1,51 @@
+name: Looker Studio Scrape
+
+on:
+  schedule:
+    # 07:00,10,13,16,19 UTC → 08:00–20:00 BST
+    - cron: '0 7,10,13,16,19 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libatk1.0-0 libgbm-dev
+
+      - name: Install Python deps & Playwright
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt playwright
+          playwright install --with-deps
+
+      - name: Run scraper
+        run: python scrape.py
+        env:
+          GOOGLE_EMAIL:    ${{ secrets.GOOGLE_EMAIL }}
+          GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
+          MAIN_WEBHOOK:    ${{ secrets.MAIN_WEBHOOK }}
+          ALERT_WEBHOOK:   ${{ secrets.ALERT_WEBHOOK }}
+
+      - name: Commit & push updated log
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add comments_log.csv
+          git diff --quiet --cached || git commit -m "ci: update comments_log.csv"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
