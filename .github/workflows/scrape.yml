@@ -20,7 +20,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: '3.11'
-  UK_TARGET_HOURS: '08 11 14 17 20'
+  UK_TARGET_HOURS: '08'
 
 jobs:
   check-time:
