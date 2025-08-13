@@ -1,0 +1,9 @@
+2025-08-13 07:27:53,411 | INFO     | Opening Looker Studio report …
+2025-08-13 07:27:54,411 | WARNING  | Redirected to login
+2025-08-13 07:27:54,454 | WARNING  | Auth rejected ⇒ one re-login cycle
+2025-08-13 07:27:54,743 | WARNING  | auth_state.json missing ⇒ auto-login
+2025-08-13 07:27:54,829 | INFO     | Auto-login → https://accounts.google.com/
+2025-08-13 07:27:59,089 | INFO     | Waiting for 2-factor push approval …
+2025-08-13 07:28:08,195 | INFO     | Login OK → state saved to auth_state.json
+2025-08-13 07:28:08,291 | INFO     | Opening Looker Studio report …
+2025-08-13 07:28:20,655 | INFO     | No new comments
