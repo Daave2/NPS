@@ -1,0 +1,14 @@
+2025-09-01 07:26:19,178 | INFO     | Opening Looker Studio report …
+2025-09-01 07:26:19,912 | WARNING  | Redirected to login
+2025-09-01 07:26:19,955 | WARNING  | Auth rejected ⇒ one re-login cycle
+2025-09-01 07:26:20,253 | WARNING  | auth_state.json missing ⇒ auto-login
+2025-09-01 07:26:20,337 | INFO     | Auto-login → https://accounts.google.com/
+2025-09-01 07:26:24,537 | INFO     | Waiting for 2-factor push approval …
+2025-09-01 07:29:24,627 | ERROR    | Login timeout: Timeout 180000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "https://myaccount.google.com/?pli=1" until 'load'
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=ALgCv6wL2qxohq2qzPX7XZEBqs746rrfQspDz1GCpWc4oXCNLo4Fu0uyqObq8Rsr&cid=10&continue=https://accounts.google.com/&dsh=S1528308344:1756711580437981&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AdBytiMLjw2FVyijnEyRpHyPceGmJgLgV32v9w6gLed1RK3bfVMUGOJZbq5FpMHm_-VOOpieuuk0xw"
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=ALgCv6wL2qxohq2qzPX7XZEBqs746rrfQspDz1GCpWc4oXCNLo4Fu0uyqObq8Rsr&cid=10&continue=https://accounts.google.com/&dsh=S1528308344:1756711580437981&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AdBytiMLjw2FVyijnEyRpHyPceGmJgLgV32v9w6gLed1RK3bfVMUGOJZbq5FpMHm_-VOOpieuuk0xw"
+  navigated to "https://accounts.google.com/v3/signin/rejected?TL=ALgCv6wL2qxohq2qzPX7XZEBqs746rrfQspDz1GCpWc4oXCNLo4Fu0uyqObq8Rsr&continue=https://accounts.google.com/&dsh=S1528308344:1756711580437981&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AdBytiMLjw2FVyijnEyRpHyPceGmJgLgV32v9w6gLed1RK3bfVMUGOJZbq5FpMHm_-VOOpieuuk0xw&rrk=3"
+============================================================. Screenshot: screens/login_timeout_1756711764.png
+2025-09-01 07:29:25,362 | INFO     | Alert sent
