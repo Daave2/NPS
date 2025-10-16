@@ -1,0 +1,16 @@
+2025-10-16 07:26:19,907 | INFO     | Opening Looker Studio report …
+2025-10-16 07:26:21,138 | WARNING  | Redirected to login
+2025-10-16 07:26:21,183 | WARNING  | Auth rejected ⇒ one re-login cycle
+2025-10-16 07:26:21,473 | WARNING  | auth_state.json missing ⇒ auto-login
+2025-10-16 07:26:21,557 | INFO     | Auto-login → https://accounts.google.com/
+2025-10-16 07:26:25,425 | INFO     | Waiting for 2-factor push approval …
+2025-10-16 07:29:25,531 | ERROR    | Login timeout: Timeout 180000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "https://myaccount.google.com/?pli=1" until 'load'
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=AMbiOORBwKPAejkDdQWpDOAIRABLoU3VTl_RWZv4-fXTysnH4hJChoMAILEUxsms&cid=10&continue=https://accounts.google.com/&dsh=S-922675014:1760599581638898&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AfYwgwWK0GyRQhCBcPOEhte0Vfn1fc1w21bHnDF1E9kpmRcJKp86pdHLREk_xh_rBqZFatByGO7z6A"
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=AMbiOORBwKPAejkDdQWpDOAIRABLoU3VTl_RWZv4-fXTysnH4hJChoMAILEUxsms&cid=10&continue=https://accounts.google.com/&dsh=S-922675014:1760599581638898&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AfYwgwWK0GyRQhCBcPOEhte0Vfn1fc1w21bHnDF1E9kpmRcJKp86pdHLREk_xh_rBqZFatByGO7z6A"
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=AMbiOORBwKPAejkDdQWpDOAIRABLoU3VTl_RWZv4-fXTysnH4hJChoMAILEUxsms&cid=10&continue=https://accounts.google.com/&dsh=S-922675014:1760599581638898&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AfYwgwWK0GyRQhCBcPOEhte0Vfn1fc1w21bHnDF1E9kpmRcJKp86pdHLREk_xh_rBqZFatByGO7z6A"
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=AMbiOORBwKPAejkDdQWpDOAIRABLoU3VTl_RWZv4-fXTysnH4hJChoMAILEUxsms&cid=10&continue=https://accounts.google.com/&dsh=S-922675014:1760599581638898&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AfYwgwWK0GyRQhCBcPOEhte0Vfn1fc1w21bHnDF1E9kpmRcJKp86pdHLREk_xh_rBqZFatByGO7z6A"
+  navigated to "https://accounts.google.com/v3/signin/challenge/dp?TL=AMbiOORBwKPAejkDdQWpDOAIRABLoU3VTl_RWZv4-fXTysnH4hJChoMAILEUxsms&cid=10&continue=https://accounts.google.com/&dsh=S-922675014:1760599581638898&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AfYwgwWK0GyRQhCBcPOEhte0Vfn1fc1w21bHnDF1E9kpmRcJKp86pdHLREk_xh_rBqZFatByGO7z6A"
+============================================================. Screenshot: screens/login_timeout_1760599765.png
+2025-10-16 07:29:25,988 | INFO     | Alert sent
