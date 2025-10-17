@@ -1,0 +1,12 @@
+2025-10-17 07:09:03,553 | INFO     | Opening Looker Studio report …
+2025-10-17 07:09:04,710 | WARNING  | Redirected to login
+2025-10-17 07:09:04,746 | WARNING  | Auth rejected ⇒ one re-login cycle
+2025-10-17 07:09:05,039 | WARNING  | auth_state.json missing ⇒ auto-login
+2025-10-17 07:09:05,127 | INFO     | Auto-login → https://accounts.google.com/
+2025-10-17 07:09:09,770 | INFO     | Waiting for 2-factor push approval …
+2025-10-17 07:12:09,929 | ERROR    | Login timeout: Timeout 180000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "https://myaccount.google.com/?pli=1" until 'load'
+  navigated to "https://accounts.google.com/v3/signin/rejected?TL=AMbiOOTFh1WptU7IM79mMR4KJnuA4hiJ0rU1hPwy67kVx2duW6vyi41qKPG2qDhw&continue=https://accounts.google.com/&dsh=S-1928755549:1760684945226909&flowEntry=ServiceLogin&flowName=WebLiteSignIn&followup=https://accounts.google.com/&ifkv=AfYwgwVsD2FFjGy2qsSV2wHKGmrjsr7_hpeL59i3yaPX5l2q3OOY_47ZYzhVBL7TP-Ltq4nSPcZcsg&rrk=3"
+============================================================. Screenshot: screens/login_timeout_1760685129.png
+2025-10-17 07:12:10,369 | INFO     | Alert sent
